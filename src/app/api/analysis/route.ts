@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   const matchId = req.nextUrl.searchParams.get('matchId')
-  if (!matchId) return NextResponse.json({ error: '缺少matchId' }, { status: 400 })
+  if (!matchId) return NextResponse.json({ analysis: null })
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('analyses')
     .select('data')
     .eq('match_id', matchId)
-    .single()
+    .maybeSingle()
 
-  if (error || !data) return NextResponse.json({ analysis: null })
-  return NextResponse.json({ analysis: data.data })
+  return NextResponse.json({ analysis: data?.data || null })
 }
